@@ -1,32 +1,32 @@
 from bs4 import BeautifulSoup
 import rendicion2 
 import csv
-import numpy 
+import numpy
+import pandas as pd
+import requests 
+
+ 
 import sys    # sys.setdefaultencoding is cancelled by site.py
 reload(sys)    # to re-enable sys.setdefaultencoding()
 sys.setdefaultencoding('utf-8')
 
-cookie = rendicion2.getRendicionCookie()
-a = rendicion2.getDatRendicion('0', '2014', 'Balance', 'P0400100D_2015_NOR_CUENTAS-ANUALES.xml', 'JSESSIONID=01344652F6361A987D42AF3A5BD6FA54.tomcatVisualizador2; JSESSIONID=1D014858FC9D39A7721AC43CCBD5F880; _gat=1; _ga=GA1.2.733593762.1480358784; treeview=000000000000000000000000000000000000000000')
-print(a.text)
+fl = pd.read_csv('/home/antonio/ayuntamientos/datos/basePedirDatos.csv')
+ano = '2013'
+estado = 'Balance'
+cookie = 'JSESSIONID=EDD2550F9C6F2ACB146F06F69F27277C.tomcatVisualizador1; _ga=GA1.2.1696214080.1479418776; JSESSIONID=50CE85017517E150BAC6AB6E022A3481; _gat=1'
 
-doc = BeautifulSoup(a.text, 'html.parser')
-table = doc.body.table
-header = doc.body.thead
-bodyTable = doc.body.tbody
-data = []
-headerRow = [th.get_text() for th in header.find("tr").find_all("th")]
-data.append(headerRow)
+#cookie = rendicion2.getRendicionCookies() #la cookie no funciona
 
 
-for row in bodyTable.findAll("tr"):
-    newRow = [td.get_text() for td in row.find_all("td")]
-    data.append(newRow)
+for i in fl.NIF:
+    fichero = i + '_' + ano + '_NOR_CUENTAS-ANUALES.xml'    
+    print 'Trabajando en: ' + fichero
+    r = rendicion2.getDatRendicion('0', ano, estado, fichero, cookie)
+    if r.ok == True:
+        parseTable(r,'/home/antonio/ayuntamientos/datos/descargas/', ano + "_" + i + "_" + estado + '.csv')
+    r.close()
 
 
-with open('some.csv', 'wb') as f:
-    writer = csv.writer(f)
-    for item in data:
-    	writer.writerow(item)
+    
 
 

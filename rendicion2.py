@@ -2,6 +2,8 @@
 import urllib2
 import requests 
 from cookielib import CookieJar
+from bs4 import BeautifulSoup
+
 
 def getRendicionCookies():
     """Obtiene una nueva cookie"""
@@ -12,7 +14,7 @@ def getRendicionCookies():
     return r.headers.get('Set-Cookie')
 
 
-def getDatRendicion(actual,ejercicio, id_form, nombreFichero, cookie): 
+def getDatRendicion(actual, ejercicio, id_form, nombreFichero, cookie): 
     """Obtiene fichero html con los datos resultantes de navegar por el arbol, para una entidad y una fecha"""   
 
     url = "http://www.rendiciondecuentas.es/VisualizadorPortalCiudadano/VisualizadorPortal.jsp"
@@ -73,5 +75,24 @@ def getNIFs(rslt):
     else:
         return "NA"
 
+
+def parseTable(r, path, fileName):
+    doc = BeautifulSoup(r.text, 'html.parser')
+    #table = doc.body.table
+    header = doc.body.thead
+    bodyTable = doc.body.tbody
+    data = []
+    headerRow = [th.get_text() for th in header.find("tr").find_all("th")]
+    data.append(headerRow)
+
+
+    for row in bodyTable.findAll("tr"):
+        newRow = [td.get_text()  for td in row.find_all("td")]
+        data.append(newRow)
+
+    with open(path + fileName, 'wb') as f:
+        writer = csv.writer(f)
+        for item in data:
+            writer.writerow(item)
 
 
