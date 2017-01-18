@@ -51,6 +51,8 @@ df_cumplimiento <- merge.data.frame(df_cumplimiento,
 
 
 
+write.csv(df_cumplimiento, file = paste0(path, "/", "cumplimiento.csv"), fileEncoding = "UTF-8")
+
 setdiff(df_cumplimiento2014$NIF, df_cumplimiento$NIF)
 setdiff(df_cumplimiento2015$NIF, df_cumplimiento$NIF)
 
@@ -63,26 +65,47 @@ remove(df_cumplimiento2015)
 #Parser para separar nombre y tipo de entidad
 #Por terminar
 
+df_cumplimiento <- read.csv("/home/antonio/ayuntamientos/datos/datosFinales/cumplimiento.csv")
+
+df_cumplimiento$tipo <- 1
+df_cumplimiento$nombre <- 1
+
+for(i in 1:length(df_cumplimiento$tipoYNombre)){
+  if(!is.na(df_cumplimiento[i,"tipoYNombre"])){
+  df_cumplimiento[i,"tipo"] <- parseTipo(df_cumplimiento[i,"tipoYNombre"])
+  df_cumplimiento[i,"nombre"] <- parseNombre(df_cumplimiento[i,"tipoYNombre"])
+  }
+}
+
+
 parseTipo <- function(strng){
   switch(substr(strng,1,3),
-         "Ayu" = substr(strng,1,10),
+         "Ayu" = substr(strng,1,12),
          "Dip" = substr(strng,1,10),
-         "Con" = substr(strng,1,10),
-         "Man" = substr(strng,1,10),
-         "Cab" = substr(strng,1,10),
-         "Com" = substr(strng,1,10), 
+         "Con" = substr(strng,1,15),
+         "Man" = substr(strng,1,12),
+         "Cab" = substr(strng,1,15),
+         "Com" = substr(strng,1,7), 
          "Agr" = substr(strng,1,10),    
-         "Áre" = substr(strng,1,10)    
+         "Áre" = substr(strng,1,18)    
   )
 }
 
-df_cumplimiento$Tipo <- 1
-for(i in 1: length(df_cumplimiento$tipoYNombre)){
-  df_cumplimiento[i,"Tipo"] <- parseTipo(df_cumplimiento[i,"tipoYNombre"])
+parseNombre <- function(strng){
+  strng <- as.character(strng)
+  switch(substr(strng,1,3),
+         "Ayu" = substr(strng,14,nchar(strng)),
+         "Dip" = substr(strng,12,nchar(strng)),
+         "Con" = substr(strng,17,nchar(strng)),
+         "Man" = substr(strng,14,nchar(strng)),
+         "Cab" = substr(strng,17,nchar(strng)),
+         "Com" = substr(strng,9,nchar(strng)), 
+         "Agr" = substr(strng,12,nchar(strng)),    
+         "Áre" = substr(strng,20,nchar(strng))    
+  )
 }
 
 
 
 
 
-write.csv(df_cumplimiento, file = paste0(path, "/", "cumplimiento.csv"), fileEncoding = "UTF-8")
